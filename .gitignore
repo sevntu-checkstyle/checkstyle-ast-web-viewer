@@ -4,3 +4,5 @@ pom.xml.releaseBackup
 .settings
 .checkstyle
 *~
+*.jar
+*.war
