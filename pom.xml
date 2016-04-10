@@ -10,9 +10,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>6.8.2</vaadin.version>
-		<gwt.version>2.3.0</gwt.version>
-		<gwt.plugin.version>2.2.0</gwt.plugin.version>
+		<vaadin.version>6.8.3</vaadin.version>
+		<gwt.plugin.version>2.1.0</gwt.plugin.version>
 	</properties>
 
 	<build>
@@ -21,27 +20,20 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 
 			<!-- Compile custom GWT components or widget dependencies with the GWT 
-				compiler -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
-				<version>${gwt.plugin.version}</version> <configuration> <webappDirectory>${project.build.directory}/${project.build.finalName}/VAADIN/widgetsets</webappDirectory> 
-				<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs> <runTarget>checkstyle-webapp</runTarget> 
-				<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp> 
-				<noServer>true</noServer> <port>8080</port> <compileReport>false</compileReport> 
+				compiler <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
+				<version>${gwt.plugin.version}</version> <configuration> <extraJvmArgs>-Xmx512M 
+				-Xss1024k</extraJvmArgs> <webappDirectory>${project.build.outputDirectory}/VAADIN/widgetsets</webappDirectory> 
 				</configuration> <executions> <execution> <goals> <goal>resources</goal> 
-				<goal>compile</goal> </goals> </execution> </executions> <dependencies> <dependency> 
-				<groupId>com.google.gwt</groupId> <artifactId>gwt-dev</artifactId> <version>${gwt.version}</version> 
-				</dependency> <dependency> <groupId>com.google.gwt</groupId> <artifactId>gwt-user</artifactId> 
-				<version>${gwt.version}</version> </dependency> </dependencies> </plugin> 
-				<plugin> <groupId>com.vaadin</groupId> <artifactId>vaadin-maven-plugin</artifactId> 
-				<version>1.0.2</version> <executions> <execution> <configuration> </configuration> 
-				<goals> <goal>update-widgetset</goal> </goals> </execution> </executions> 
-				</plugin> -->
+				<goal>compile</goal> </goals> </execution> </executions> </plugin> <plugin> 
+				<groupId>com.vaadin</groupId> <artifactId>vaadin-maven-plugin</artifactId> 
+				<executions> <execution> <goals> <goal>update-widgetset</goal> </goals> </execution> 
+				</executions> </plugin> -->
 
 			<!-- A simple Jetty test server at http://localhost:8080/checkstyle-webapp 
 				can be launched with the Maven goal jetty:run and stopped with jetty:stop -->
@@ -66,7 +58,64 @@
 					</webAppConfig>
 				</configuration>
 			</plugin>
+
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											gwt-maven-plugin
+										</artifactId>
+										<versionRange>
+											[2.3.0-1,)
+										</versionRange>
+										<goals>
+											<goal>resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.vaadin</groupId>
+										<artifactId>
+											vaadin-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.2,)
+										</versionRange>
+										<goals>
+											<goal>
+												update-widgetset
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<repositories>
@@ -102,13 +151,32 @@
 		<dependency>
 			<groupId>com.puppycrawl.tools</groupId>
 			<artifactId>checkstyle</artifactId>
-			<version>5.7</version>
+			<version>6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.3</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>9.1.0.M0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-annotations</artifactId>
+			<version>9.1.0.M0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.1.0.M0</version>
+		</dependency>
+		<!-- <dependency> <groupId>org.vaadin.addons</groupId> <artifactId>aceeditor</artifactId> 
+			<version>0.8.14</version> </dependency> -->
+
 	</dependencies>
 
 </project>
