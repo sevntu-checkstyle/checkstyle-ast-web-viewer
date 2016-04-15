@@ -11,7 +11,7 @@ This script builds a Docker image with compiled app binaries which will be ready
 docker run --rm --net host checkstyle/ast-web-viewer
 ```
 
-How to deploy:
+### How to deploy:
 - Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub (howto: https://docs.docker.com/docker-hub/repos/)
 - Then login to 128.199.42.52, and deploy this image there:
 
