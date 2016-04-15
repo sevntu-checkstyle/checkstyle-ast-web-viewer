@@ -12,7 +12,7 @@ docker run --rm --net host checkstyle/ast-web-viewer
 ```
 
 ### How to deploy:
-- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub (howto: https://docs.docker.com/docker-hub/repos/)
+- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub ([howto](https://docs.docker.com/docker-hub/repos))
 - Then login to 128.199.42.52, and deploy this image there:
 
 ```
