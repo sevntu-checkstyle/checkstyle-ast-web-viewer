@@ -4,7 +4,7 @@ Vaadin webapp for displaying Checkstyle Synthax tree (AST) visually in browser
 
 ### How to build: 
 - Install Docker 1.9+, Java 8 and Maven 3.
-- Run https://github.com/sevntu-checkstyle/checkstyle-ast-web-viewer/blob/master/docker/build-docker.sh
+- Run [build-docker.sh](https://github.com/sevntu-checkstyle/checkstyle-ast-web-viewer/blob/master/docker/build-docker.sh)
 
 This script builds a Docker image with compiled app binaries which will be ready to run locally with command below:
 ```
