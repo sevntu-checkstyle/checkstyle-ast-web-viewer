@@ -12,7 +12,7 @@ docker run --rm --net host checkstyle/ast-web-viewer
 ```
 
 ### How to deploy:
-- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub ([howto](https://docs.docker.com/docker-hub/repos), [page at docker.io](https://hub.docker.com/r/daniilyar/checkstyle-ast-web-viewer/)):
+- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub ([howto](https://docs.docker.com/docker-hub/repos), [page at docker.io](https://hub.docker.com/r/daniilyar/checkstyle-ast-web-viewer/)). Example:
 ```
 sudo docker login 
 sudo docker tag checkstyle/ast-web-viewer daniilyar/checkstyle-ast-web-viewer:<version>
