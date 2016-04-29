@@ -12,11 +12,17 @@ docker run --rm --net host checkstyle/ast-web-viewer
 ```
 
 ### How to deploy:
-- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub ([howto](https://docs.docker.com/docker-hub/repos), [page at docker.io](https://hub.docker.com/r/daniilyar/checkstyle-ast-web-viewer/))
+- Deploy updated Docker image 'checkstyle/ast-web-viewer' to Docker Hub ([howto](https://docs.docker.com/docker-hub/repos), [page at docker.io](https://hub.docker.com/r/daniilyar/checkstyle-ast-web-viewer/)):
+```
+sudo docker login 
+sudo docker tag checkstyle/ast-web-viewer daniilyar/checkstyle-ast-web-viewer:<version>
+sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
+```
+
 - Login to 128.199.42.52, and deploy the image from Docker Hub there with command below (TODO: automate via ansible + sh launcher):
 
 ```
-docker run -d --restart always --net host checkstyle/ast-web-viewer
+docker run -d --restart always --net host checkstyle/ast-web-viewer:<version>
 ```
 
 For now, there is no DNS name and no SSL for this host. But we will have them soon )
