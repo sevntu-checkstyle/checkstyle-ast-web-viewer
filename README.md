@@ -25,7 +25,7 @@ sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
 deployment/run.sh
 ```
 
-DY: this script requires Ansible 1.9.4+ to be installed on your machine (`pip install ansible==1.9.4`)
+DY: deploy script requires Ansible 1.9.4+ to be installed on your machine (`pip install ansible==1.9.4`)
 
 - Test how it works by opening http://347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com
 
