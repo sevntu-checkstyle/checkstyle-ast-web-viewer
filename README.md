@@ -19,7 +19,7 @@ sudo docker tag checkstyle/ast-web-viewer daniilyar/checkstyle-ast-web-viewer:<v
 sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
 ```
 
-- Deploy new app version to Checkstyle Scaleway instance (347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com or 212.47.237.40):
+- Deploy new app version to our public instance (212.47.237.40):
 
 ```
 deployment/run.sh
