@@ -19,12 +19,15 @@ sudo docker tag checkstyle/ast-web-viewer daniilyar/checkstyle-ast-web-viewer:<v
 sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
 ```
 
-- Login to Checkstyle Scaleway instance (347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com or 212.47.237.40), and deploy the image from Docker Hub there with command below (TODO: automate via ansible + sh launcher):
+- Deploy new app version to Checkstyle Scaleway instance (347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com or 212.47.237.40):
 
 ```
-docker run -d --restart always -p "80:8080" daniilyar/checkstyle-ast-web-viewer:<version>
+deployment/run.sh
 ```
 
-The test how it works: http://347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com
-For now, there is no pretty DNS name for this host. But we will have it soon )
+DY: this script requires Ansible 1.9.4+ to be installed on your machine (`pip install ansible==1.9.4`)
+
+- Test how it works by opening http://347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com
+
+DY: For now, there is no pretty DNS name for this host. But we will have it soon )
 
