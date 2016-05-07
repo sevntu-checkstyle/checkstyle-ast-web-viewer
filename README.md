@@ -29,5 +29,3 @@ DY: deploy script requires Ansible 1.9.4+ to be installed on your machine (`pip 
 
 - Test how it works by opening http://347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com
 
-DY: For now, there is no pretty DNS name for this host. But we will have it soon )
-
