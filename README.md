@@ -25,4 +25,6 @@ sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
 docker run -d --restart always -p "80:8080" daniilyar/checkstyle-ast-web-viewer:<version>
 ```
 
-For now, there is no DNS name for this host. But we will have it soon )
+The test how it works: http://347c5f47-a226-4ed6-a4ff-a01680db9660.pub.cloud.scaleway.com
+For now, there is no pretty DNS name for this host. But we will have it soon )
+
