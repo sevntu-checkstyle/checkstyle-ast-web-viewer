@@ -1,0 +1,7 @@
+java_download_link: http://download.oracle.com/otn-pub/java/jdk/8u31-b13/jdk-8u31-linux-x64.tar.gz
+java_version: 1.8.0_31
+java_name: jdk"{{ java_version }}"
+download_folder: /opt
+java_archive: "{{ download_folder }}/{{ java_name }}.tar.gz"
+java_folder: /usr/lib/jvm
+java_alias: java-8-oracle

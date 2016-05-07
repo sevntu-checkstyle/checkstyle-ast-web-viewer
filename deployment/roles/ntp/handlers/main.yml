@@ -1,0 +1,13 @@
+---
+
+- name: Restart openntpd
+  sudo: yes
+  service:
+    name: 'openntpd'
+    state: 'restarted'
+
+- name: Restart ntp
+  sudo: yes
+  service:
+    name: 'ntp'
+    state: 'restarted'

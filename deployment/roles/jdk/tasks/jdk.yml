@@ -1,0 +1,41 @@
+---
+
+- name: Download Java
+  sudo: yes
+  command: 'wget -q --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" {{ java_download_link }} -O {{ java_archive }}' 
+
+- name: Extract Java archive
+  sudo: yes
+  command: "tar -xzf {{ java_archive }} -C {{ download_folder }} creates={{ download_folder }}/{{ java_name }}"
+
+- name: Fix ownership
+  sudo: yes
+  file: "state=directory path={{download_folder}}/{{java_name}} owner=root group=root recurse=yes"
+
+- name: Create Java folder
+  sudo: yes
+  file: state=directory path={{ java_folder }}
+
+- name: Move Java to a final folder
+  sudo: yes
+  command: "mv -n {{ download_folder }}/{{ java_name }} {{ java_folder }} creates={{ java_folder }}/{{ java_name }}"
+
+- name: Create symlink for easier update
+  sudo: yes
+  file: "state=link src={{ java_folder }}/{{ java_name }} dest={{ java_folder }}/{{ java_alias }}"
+
+- name: Make Java available for system
+  sudo: yes
+  command: 'update-alternatives --install "/usr/bin/java" "java" "{{ java_folder }}/{{ java_alias }}/bin/java" 1'
+
+# TODO: set JAVA_HOME for all existing users on the instance
+- name: setup JAVA_HOME
+  lineinfile: dest=~/.bashrc line="export JAVA_HOME={{ java_folder }}/{{ java_alias }}" state=present insertafter=EOF create=true
+
+- name: append JAVA_HOME to PATH
+  lineinfile: dest=~/.bashrc line="export PATH=$JAVA_HOME/bin:$PATH" state=present insertafter=EOF create=true
+
+- name: Source ~/.bashrc
+  shell: . ~/.bashrc
+  args:
+     executable: /bin/bash

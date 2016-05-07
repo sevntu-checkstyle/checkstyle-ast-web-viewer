@@ -1,0 +1,15 @@
+---
+
+- name: update apt cache if it isn't updated for more than 24 hours
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=86400 # seconds
+  register: update_apt_cache
+  until: update_apt_cache | success
+  retries: 10
+  delay: 5
+  tags: [ 'update_apt_cache', 'install_apt_packages' ]
+
+- name: Install apt packages
+  sudo: yes
+  apt: name={{ item.name }} force={{ item.force | default('yes') }} state={{ item.state }}
+  with_items: packages

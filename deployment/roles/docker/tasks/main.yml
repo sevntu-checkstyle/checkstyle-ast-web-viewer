@@ -1,0 +1,36 @@
+---
+
+- debug: msg="Installing docker version is {{ docker_version }} ..."
+  when: docker_version is defined
+
+- name: Check if docker is already installed
+  sudo: yes
+  shell: docker --version | awk '{for (i=0; i<=NF; i++){if ($i == "version"){print $(i+1);exit}}}' | tr -d ','
+  failed_when: false
+  changed_when: false
+  register: installed_docker_version_check
+
+- set_fact: 
+    installed_docker_version: "{{ installed_docker_version_check.stdout }}"
+
+- debug: msg="Currently installed docker version is {{ installed_docker_version }}"
+  when: installed_docker_version | length > 0
+
+- include: install_docker.yml
+  when: ( installed_docker_version != docker_version ) or ( force_install_docker | default(false) | bool )
+
+- user: name={{ item }} group=docker append=yes
+  sudo: yes
+  with_items: users_to_append_to_docker_group | default([ "{{ ansible_user_id }}" ])
+
+# Ensure that Docker is started
+- name: Start docker
+  sudo: yes
+  service: name=docker state=started
+
+- name: Check the result Docker version
+  shell: docker --version
+  register: docker_daemon_version
+  failed_when: not "{{ docker_version }}" in docker_daemon_version.stdout
+  changed_when: false
+  sudo: yes

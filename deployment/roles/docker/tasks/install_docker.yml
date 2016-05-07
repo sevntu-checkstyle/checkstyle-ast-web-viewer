@@ -1,0 +1,36 @@
+---
+
+- name: Add GPG key for docker-engine package
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+  sudo: yes
+
+- name: Add Docker apt repo
+  shell: add-apt-repository 'deb https://apt.dockerproject.org/repo ubuntu-trusty main'
+  sudo: yes
+
+- name: update apt cache
+  apt: update_cache=yes
+  sudo: yes
+
+  # Ensure there is no outdated lxc-docker apt packages
+- apt: name=lxc-docker* state=absent purge=yes
+  sudo: yes
+  ignore_errors: yes
+
+- name: Get the kernel release
+  shell: uname -r
+  register: kernel_release
+  changed_when: false
+  sudo: yes
+
+- name: Install Docker apt packages
+  apt: name="{{ item }}"
+  with_items:
+    - "linux-image-extra-{{ kernel_release.stdout }}" DY: there is no extra image for 4.5.1 kernel available anywhere yet, so we manually setup 4.4.0-22 version instead below
+    - "docker-engine={{ docker_version }}-0~trusty"
+  sudo: yes
+
+- name: Install docker-py (This pip package is needed by Ansible docker module)
+  pip: name=docker-py version=1.6.0
+  tags: install_docker_py_package
+  sudo: yes

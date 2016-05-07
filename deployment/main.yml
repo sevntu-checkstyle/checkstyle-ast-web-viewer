@@ -1,0 +1,57 @@
+---
+
+- name: Provision Checkstyle host (common part)
+  hosts: all
+  vars:
+    apt_packages:
+      - { name: apt-transport-https, state: present }
+      - { name: python-pip, state: present }  
+      - { name: python-software-properties, state: present }
+      - { name: git, state: present }
+      - { name: curl, state: present }
+      - { name: wget, state: present }
+      - { name: openvpn, state: present }
+      - { name: ssh, state: present }
+      - { name: expect, state: present }
+      - { name: htop, state: present }
+      - { name: iftop, state: present }
+      - { name: iotop, state: present }
+      - { name: mtr, state: present }
+      - { name: pwgen, state: present }
+      - { name: meld, state: present }
+      - { name: jq, state: present }
+      - { name: python, state: present }
+      - { name: unzip, state: present }
+    pip_packages:
+      - { name: shyaml, state: present }
+      - { name: keyring, state: present }
+      - { name: keyrings.alt, state: present }
+  roles:
+    - { role: common, tags: ['common-role', 'common'] }
+    - { role: bulk-apt, packages: "{{ apt_packages }}", update_apt_cache: no, tags: ['apt_packages', 'common'] }
+    - { role: bulk-pip, packages: "{{ pip_packages }}", tags: ['pip_packages', 'common'] }
+    - { role: ntp, tags: ['ntp', 'common'] }
+    # DY: Docker 1.10 is already present inside our cloud instance by default
+    #- { role: docker, users_to_append_to_docker_group: ['docker', 'dyaroslavtsev'], tags: ['docker', 'common'] }
+    #- { role: jdk, tags: ['jdk', 'common'] }
+    #- { role: maven, tags: ['maven', 'common'] }
+
+- name: Provision Checkstyle host (deploy apps)
+  hosts: all
+  vars:
+    ast_web_viewer_version: 2
+  tasks:
+    - name: Run Checkstyle AST web viewer
+      docker:
+        image: "daniilyar/checkstyle-ast-web-viewer:{{ ast_web_viewer_version }}"
+        ports:
+          - "80:8080"
+        restart_policy: always
+        restart_policy_retry: 0
+        name: ast-viewer
+        state: reloaded
+        # command: "{{ command }}"
+        # env:
+        #  HEAP_SIZE: "{{ heap_size }}"
+      sudo: yes
+      tags: [ 'ast-web-viewer' ]

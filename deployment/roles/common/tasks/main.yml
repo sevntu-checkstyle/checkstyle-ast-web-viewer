@@ -1,0 +1,81 @@
+---
+
+  # DY: see more at https://blog.stathat.com/2014/12/22/fix_ec2_network_issue_skb_rides_the_rocket.html
+- name: Disable scatter-gather
+  lineinfile: dest=/etc/rc.local regexp='^/sbin/ethtool' line='/sbin/ethtool -K eth0 sg off' insertbefore="exit 0" state=present
+  sudo: yes
+  tags: [ 'fix_skb_rides_the_rocket_error' ]
+
+- name: update apt cache if it isn't updated for more than 24 hours
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=86400 # seconds
+  register: update_apt_cache
+  until: update_apt_cache | success
+  retries: 10
+  delay: 5
+  tags: [ 'update_apt_cache', 'install_apt_packages' ]
+
+- name: Create a superusers group
+  sudo: yes
+  group: name=superusers system=yes
+  tags: os_users
+
+- name: Create a superusers group allowed to execute any command with sudo rights without being asked for password
+  sudo: yes
+  lineinfile: dest=/etc/sudoers state=present regexp='^%superusers' line='%superusers ALL=(ALL) NOPASSWD:ALL' validate='visudo -cf %s'
+  tags: os_users
+
+- name: Add OS users
+  sudo: yes
+  user: name="{{ item.name }}" groups="{{ item.groups | default(omit) }}"
+  with_items:
+    - { name: dyaroslavtsev, groups: "superusers" }
+  register: os_users
+  tags: os_users
+
+- name: Set /bin/bash as a default shell for users which haven't yet a shell specified 
+  sudo: yes
+  changed_when: false
+  # DY: Please be VERY careful when updating the sed rule here!!! Wrong sed rule here can break the /etc/password, so users won't be able to login via ssh
+  shell: 'sed -i "s/:$/:\/bin\/bash/" /etc/passwd'
+
+#- name: Add environment variables
+#  sudo: yes
+#  lineinfile: dest=/etc/environment regexp='^{{ item.name }}=' line={{ item.name }}={{ item.value }}
+#  tags: env_props
+#  with_items:
+#    - { name: 'TEST', value: 'TEST' }
+
+- name: Update ulimit configuration
+  sudo: yes
+  template: src=limits.conf.j2 dest=/etc/security/limits.conf
+  tags: ['ulimit_config']
+
+- name: Setup updating ulimit for root user
+  sudo: yes
+  lineinfile: dest=/etc/pam.d/common-session line='session required pam_limits.so' state=present
+  tags: ['ulimit_config']
+
+- name: Increase sshd server max auth tries
+  sudo: yes
+  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^MaxAuthTries' line='MaxAuthTries {{ sshd_max_auth_tries }}'
+  notify: reload sshd
+
+- name: Avoid setting user language when connecting to instance via SSH
+  sudo: yes
+  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^AcceptEnv LANG LC_*' line='# AcceptEnv LANG LC_*'
+  notify: reload sshd
+
+- name: Put OPS scripts to '/bin' dir
+  sudo: yes
+  copy: src={{ item }} dest='/bin' owner=root group=root mode=775
+  with_fileglob:
+    - "{{ role_path }}/files/scripts/*"
+  tags: [ 'put-ops-scripts' ]
+
+# This task should be performed after users creation (user nagios created in tasks within 'nrpe.yml')
+- name: Allow some users to run some specific commands with sudo
+  sudo: yes
+  lineinfile: "dest=/etc/sudoers state=present regexp='^{{ item.user }}' line='{{ item.user }} ALL=(ALL) NOPASSWD: {{ item.allowed_sudo_commands }}' validate='visudo -cf %s'"
+  with_items:
+    - { user: dyaroslavtsev, allowed_sudo_commands: "/usr/bin/docker" }

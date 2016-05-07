@@ -1,0 +1,88 @@
+---
+# Run on an unsupported platform fails the play
+- name: Assert platform is supported
+  tags: maven
+  assert:
+    that:
+      - ansible_os_family in maven_supported_platforms
+
+- name: Load version vars
+  tags: maven
+  with_first_found:
+    - ../vars/versions/{{ maven_version }}.yml
+    - ../vars/versions/default.yml
+  include_vars: "{{ item }}"
+
+- name: Assert version vars
+  tags: maven
+  assert:
+    that:
+      - maven_redis_sha256sum not in (None, "")
+
+- name: Download Maven
+  get_url:  url={{ maven_mirror }}/{{ maven_redis_filename }}  dest={{ maven_download_dir }}/{{ maven_redis_filename }} mode=0644 sha256sum={{ maven_redis_sha256sum }}
+  sudo: yes
+  tags: maven
+
+- name: Create Maven installation directory
+  file: state=directory owner=0 group=0 mode=0755 dest={{ maven_install_dir }}
+  sudo: yes
+  tags: maven
+
+- name: Install Maven
+  tags: maven
+  sudo: yes
+  unarchive: src={{ maven_download_dir }}/{{ maven_redis_filename }} dest={{ maven_install_dir }} copy=false creates={{ maven_install_dir }}/apache-maven-{{ maven_version }}
+
+- name: Install Maven bin directory
+  file: state=directory owner=0 group=0 mode=0755 dest={{ maven_bin_path }}
+  sudo: yes
+  tags: maven
+
+- name: Install Maven binary
+  sudo: yes
+  file: state=link force=true src={{ maven_install_dir }}/apache-maven-{{ maven_version }}/bin/mvn dest={{ maven_bin_path }}/mvn
+  tags: maven
+
+- name: Register Maven as /bin/mvn
+  sudo: yes
+  file: state=link force=true src={{ maven_bin_path }}/mvn dest=/bin/mvn
+  tags: maven
+
+- name: Install Ansible facts.d directory
+  tags: maven
+  sudo: yes
+  file: state=directory dest=/etc/ansible/facts.d owner=0 group=0 mode=0755
+
+- name: Install Maven facts
+  tags: maven
+  sudo: yes
+  template: src=facts.j2 dest=/etc/ansible/facts.d/maven.fact owner=0 group=0 mode=0644
+
+# Add Docker registry SSL cert to trusted certs list
+- copy: src=nexus.crt dest=/tmp/nexus.crt
+  tags: add_cert_to_trusted
+  sudo: yes
+
+- name: Check if trusted certs contain docker registry cert
+  shell: grep /etc/ssl/certs/ca-certificates.crt -e "$(cat /tmp/nexus.crt | sed -n 2p)"
+  sudo: yes
+  ignore_errors: true
+  register: caCertExists
+  tags: add_cert_to_trusted
+
+- name: Resolve Java path
+  shell: readlink -f "$(which java)" | rev | cut --complement -d '/' -f 1-2 | rev
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  when: caCertExists.rc != 0
+  register: java_path
+  tags: add_cert_to_trusted
+
+- name: Add docker-registry certificate to trusted certs
+  shell: cat /tmp/nexus.crt >> /etc/ssl/certs/ca-certificates.crt && {{ java_path.stdout }}/bin/keytool -import -trustcacerts -keystore {{ java_path.stdout }}/jre/lib/security/cacerts -storepass changeit -noprompt -alias nexus -file /tmp/nexus.crt
+  sudo: yes
+  when: caCertExists.rc != 0
+  tags: add_cert_to_trusted
+

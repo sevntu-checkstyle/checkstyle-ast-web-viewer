@@ -1,0 +1,51 @@
+- name: Set device name
+  set_fact:
+    device: "{{ device | default('/dev/xvdb') }}"
+
+- name: Take a list of attached devices
+  shell: lsblk -nl | awk '{print "/dev/"$1}'
+  changed_when: false
+  register: attached_devices
+
+- name: Check if required device attached
+  set_fact: device_attached={{ device in attached_devices.stdout }}
+  changed_when: false
+
+- fail: msg="Device '{{ device }}' not found at host '{{ inventory_hostname }}', cannot mount it as '{{ fs_type | default ('ext4') }}' filesystem into '{{ to_folder }}'!!!"
+  when: (strict | default(false)) and not device_attached
+
+- debug: msg="Device '{{ device }}' not found at host '{{ inventory_hostname }}', skipping mounting it as '{{ fs_type | default ('ext4') }}' filesystem into '{{ to_folder }}'"
+  when: not ( strict | default(false) ) and not device_attached
+
+- name: Check if current filesystem is already mounted
+  command: df
+  changed_when: false
+  register: filesystems
+  when: device_attached
+
+- name: Create filesystem
+  sudo: yes
+  filesystem: fstype={{ fs_type | default ('ext4') }} dev={{ device | default ('/dev/xvdb') }}
+  when: device_attached and device not in filesystems.stdout and not ( skip_filesystem_creation | default(false) )
+  tags: createfs
+
+- name: Mount volume
+  sudo: yes
+  mount: src={{ device | default ('/dev/xvdb') }} name={{ to_folder | mandatory }} fstype={{ fs_type | default ('ext4') }} state=mounted
+  when: device_attached and device not in filesystems.stdout
+  register: mount
+  tags: mount
+
+- name: set owner for just mounted directory
+  sudo: yes
+  file: path={{ to_folder | mandatory }} owner={{ to_folder_owner | default('root') }} group={{ to_folder_group | default('root') }} mode={{ to_folder_mode | default(700) }}
+  when: device_attached and mount.changed and device not in filesystems.stdout
+  tags: mount
+
+- debug: msg="Symlinking just mounted directory {{ to_folder }} to {{ symlink_to }} ..."
+  when: device_attached and symlink_to is defined
+
+- name: Symlink mounted directory from specified location
+  sudo: yes
+  file: src={{ to_folder | mandatory }} dest={{ symlink_to }} state=link force=yes mode={{ symlink_mode | default(700) }}
+  when: device_attached and symlink_to is defined

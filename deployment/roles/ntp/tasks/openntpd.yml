@@ -1,0 +1,44 @@
+---
+
+- name: Make sure that ntpd is not installed
+  sudo: yes
+  apt:
+    name: 'ntp'
+    state: 'absent'
+    purge: True
+
+# https://bugs.launchpad.net/ubuntu/+source/openntpd/+bug/458061 for more details
+- name: Restart Apparmor
+  sudo: yes
+  shell: /etc/init.d/apparmor restart
+  when: restart_apparmor | default(false)
+  failed_when: false
+
+- name: Install OpenNTPd package
+  sudo: yes
+  apt:
+    name: 'openntpd'
+    state: 'present'
+    #install_recommends: False
+
+- name: Divert original /etc/openntpd/ntpd.conf
+  sudo: yes
+  command: dpkg-divert --quiet --local --divert /etc/openntpd/ntpd.conf.dpkg-divert
+           --rename /etc/openntpd/ntpd.conf creates=/etc/openntpd/ntpd.conf.dpkg-divert
+
+- name: Configure OpenNTPd
+  sudo: yes
+  template:
+    src: 'etc/openntpd/ntpd.conf.j2'
+    dest: '/etc/openntpd/ntpd.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  notify: [ 'Restart openntpd' ]
+
+- name: Force set valid time
+  sudo: yes
+  shell: service openntpd stop && ntpdate -s {{ item }} && service openntpd start
+  when: force | default(false)
+  failed_when: false
+  with_random_choice: ntp_servers

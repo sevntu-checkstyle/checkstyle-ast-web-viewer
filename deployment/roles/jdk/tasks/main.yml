@@ -1,0 +1,15 @@
+---
+
+- name: Check Java Version
+  command: bash -c "java -version 2>&1 | grep "{{ java_version }}" | awk '{print $3}' | sed -n 1p "
+  register: java_version_result
+  tags: jdk
+
+- name: Debug why farther steps will be skipped
+  debug: msg="JDK {{ java_version }} is already installed. All farther steps will be skipped"
+  when: java_version_result.stdout | default("") != "" 
+  tags: jdk
+
+- include: jdk.yml
+  when: java_version_result.stdout | default("") == "" 
+  tags: jdk
