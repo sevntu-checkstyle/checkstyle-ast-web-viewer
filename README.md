@@ -22,7 +22,7 @@ sudo docker push daniilyar/checkstyle-ast-web-viewer:<version>
 - Login to 128.199.42.52, and deploy the image from Docker Hub there with command below (TODO: automate via ansible + sh launcher):
 
 ```
-docker run -d --restart always --net host daniilyar/checkstyle-ast-web-viewer:<version>
+docker run -d --restart always -p "80:8080" daniilyar/checkstyle-ast-web-viewer:<version>
 ```
 
 For now, there is no DNS name and no SSL for this host. But we will have them soon )
