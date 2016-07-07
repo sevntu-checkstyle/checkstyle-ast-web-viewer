@@ -9,6 +9,8 @@ mvn clean install -DskipTests
 
 cp $BASEDIR/../target/*.war "$BASEDIR/ast-web-viewer.war"
 
+cd "$BASEDIR"
+
 sudo docker build -t checkstyle/ast-web-viewer .
 
 echo "Done. To execute the application, run:"
